@@ -78,14 +78,14 @@ export default function DocumentDetail() {
     if (!selectedDept) return;
     const deptName = departments?.find((d) => String(d.id) === selectedDept)?.name ?? selectedDept;
     const newStatus = `ئاڕاستەکرا بۆ: ${deptName}`;
-    const action = `نوسراوەکە ئاڕاستەکرا بۆ: ${deptName}`;
+    const action = `نووسراوەکە ئاڕاستەکرا بۆ: ${deptName}`;
     updateDocMutation.mutate(
       { id: documentId, data: { current_status: newStatus } },
       {
         onSuccess: () => {
           createLogMutation.mutate(
             { id: documentId, data: { action, notes: note || undefined } },
-            { onSuccess: () => toast({ title: "نوسراوەکە بە سەرکەوتوویی ئاڕاستەکرا.", description: deptName }) }
+            { onSuccess: () => toast({ title: "نووسراوەکە بە سەرکەوتوویی ئاڕاستەکرا.", description: deptName }) }
           );
         },
         onError: (err: any) =>
@@ -105,9 +105,9 @@ export default function DocumentDetail() {
   if (!document) {
     return (
       <div className="text-center p-8" style={ku}>
-        <h2 className="text-xl font-bold">نوسراوەکە نەدۆزرایەوە</h2>
+        <h2 className="text-xl font-bold">نووسراوەکە نەدۆزرایەوە</h2>
         <Button asChild className="mt-4">
-          <Link href="/documents">گەڕانەوە بۆ نوسراوەکان</Link>
+          <Link href="/documents">گەڕانەوە بۆ نووسراوەکان</Link>
         </Button>
       </div>
     );
@@ -145,12 +145,12 @@ export default function DocumentDetail() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <FileText className="h-5 w-5 text-muted-foreground" />
-                زانیارییەکانی نوسراو
+                زانیارییەکانی نووسراو
               </CardTitle>
             </CardHeader>
             <CardContent>
               <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-3 text-sm">
-                <dt className="text-muted-foreground font-medium">ژمارەی نوسراو:</dt>
+                <dt className="text-muted-foreground font-medium">ژمارەی نووسراو:</dt>
                 <dd className="font-semibold">{document.document_number}</dd>
 
                 <dt className="text-muted-foreground font-medium">ڕێکەوت:</dt>
@@ -266,7 +266,7 @@ export default function DocumentDetail() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <History className="h-5 w-5 text-muted-foreground" />
-                مێژووی جووڵەی نوسراو
+                مێژووی جووڵەی نووسراو
               </CardTitle>
             </CardHeader>
             <CardContent>
