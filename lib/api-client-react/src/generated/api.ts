@@ -1402,6 +1402,83 @@ export const useDeleteRole = <TError = ErrorType<ErrorResponse>,
       return useMutation(getDeleteRoleMutationOptions(options));
     }
 
+export const getGetRoleUsersUrl = (id: number,) => {
+
+
+
+
+  return `/api/roles/${id}/users`
+}
+
+/**
+ * @summary Get all users assigned to a role
+ */
+export const getRoleUsers = async (id: number, options?: RequestInit): Promise<UserWithRoles[]> => {
+
+  return customFetch<UserWithRoles[]>(getGetRoleUsersUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRoleUsersQueryKey = (id: number,) => {
+    return [
+    `/api/roles/${id}/users`
+    ] as const;
+    }
+
+
+export const getGetRoleUsersQueryOptions = <TData = Awaited<ReturnType<typeof getRoleUsers>>, TError = ErrorType<ErrorResponse>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRoleUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRoleUsersQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRoleUsers>>> = ({ signal }) => getRoleUsers(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRoleUsers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRoleUsersQueryResult = NonNullable<Awaited<ReturnType<typeof getRoleUsers>>>
+export type GetRoleUsersQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get all users assigned to a role
+ */
+
+export function useGetRoleUsers<TData = Awaited<ReturnType<typeof getRoleUsers>>, TError = ErrorType<ErrorResponse>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRoleUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRoleUsersQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getGetDashboardSummaryUrl = () => {
 
 

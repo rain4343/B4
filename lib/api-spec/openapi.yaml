@@ -467,6 +467,33 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /roles/{id}/users:
+    get:
+      operationId: getRoleUsers
+      tags: [roles]
+      summary: Get all users assigned to a role
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserWithRoles"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   # ── Dashboard ─────────────────────────────────────────────────
   /dashboard/summary:
     get:

@@ -358,6 +358,30 @@ export const DeleteRoleResponse = zod.void()
 
 
 /**
+ * @summary Get all users assigned to a role
+ */
+export const GetRoleUsersParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetRoleUsersResponseItem = zod.object({
+  "id": zod.number(),
+  "full_name": zod.string(),
+  "username": zod.string(),
+  "email": zod.string(),
+  "department_id": zod.number().nullish(),
+  "department_name": zod.string().nullish(),
+  "created_at": zod.coerce.date(),
+  "updated_at": zod.coerce.date(),
+  "roles": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+}))
+})
+export const GetRoleUsersResponse = zod.array(GetRoleUsersResponseItem)
+
+
+/**
  * @summary Get dashboard summary counts
  */
 export const GetDashboardSummaryResponse = zod.object({
