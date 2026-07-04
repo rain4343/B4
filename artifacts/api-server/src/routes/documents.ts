@@ -17,7 +17,20 @@ import {
   ForwardDocumentParams,
   ForwardDocumentBody,
 } from "@workspace/api-zod";
+import { getUserRoleNames } from "./auth";
+
 const router = Router();
+
+// Role name that grants document-forwarding permission, in addition to the
+// hardcoded super admin (user id 1).
+export const FORWARD_DOCUMENTS_ROLE = "ئاڕاستەکردنی نووسراو";
+
+async function canForwardDocuments(userId: number | undefined): Promise<boolean> {
+  if (!userId) return false;
+  if (userId === 1) return true;
+  const roles = await getUserRoleNames(userId);
+  return roles.includes(FORWARD_DOCUMENTS_ROLE);
+}
 
 // ── File upload setup ─────────────────────────────────────────
 const uploadDir = path.join(process.cwd(), "uploads", "attachments");
@@ -229,8 +242,9 @@ router.post("/documents/:id/attachment", upload.single("attachment"), async (req
 
 // POST /documents/:id/forward
 router.post("/documents/:id/forward", async (req, res) => {
-  if (req.session?.userId !== 1) {
-    return res.status(403).json({ error: "تەنها بەڕێوەبەری سەرەکی دەتوانێت نووسراو ئاڕاستە بکات" });
+  const allowed = await canForwardDocuments(req.session?.userId);
+  if (!allowed) {
+    return res.status(403).json({ error: "تۆ دەسەڵاتی ئاڕاستەکردنی نووسراوت نییە" });
   }
 
   const paramParsed = ForwardDocumentParams.safeParse(req.params);

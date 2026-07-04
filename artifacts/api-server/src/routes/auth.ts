@@ -1,10 +1,19 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { db } from "@workspace/db";
-import { usersTable } from "@workspace/db/schema";
+import { usersTable, rolesTable, roleUserTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 
 const router = Router();
+
+export async function getUserRoleNames(userId: number): Promise<string[]> {
+  const rows = await db
+    .select({ name: rolesTable.name })
+    .from(roleUserTable)
+    .innerJoin(rolesTable, eq(roleUserTable.role_id, rolesTable.id))
+    .where(eq(roleUserTable.user_id, userId));
+  return rows.map((r) => r.name);
+}
 
 // POST /api/auth/login
 router.post("/auth/login", async (req, res) => {
@@ -51,17 +60,20 @@ router.post("/auth/login", async (req, res) => {
     req.session.full_name = user.full_name;
     req.session.email = user.email;
 
-    req.session.save((saveErr) => {
+    req.session.save(async (saveErr) => {
       if (saveErr) {
         res.status(500).json({ error: "هەڵەی تۆمارکردنی سێشن" });
         return;
       }
+
+      const roles = await getUserRoleNames(user.id);
 
       res.json({
         id: user.id,
         username: user.username,
         full_name: user.full_name,
         email: user.email,
+        roles,
       });
     });
   });
@@ -76,16 +88,18 @@ router.post("/auth/logout", (req, res) => {
 });
 
 // GET /api/auth/me
-router.get("/auth/me", (req, res) => {
+router.get("/auth/me", async (req, res) => {
   if (!req.session?.userId) {
     res.status(401).json({ error: "داخڵ نەبووی" });
     return;
   }
+  const roles = await getUserRoleNames(req.session.userId);
   res.json({
     id: req.session.userId,
     username: req.session.username,
     full_name: req.session.full_name,
     email: req.session.email,
+    roles,
   });
 });
 

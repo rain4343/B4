@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useRoute } from "wouter";
-import { useAuth } from "@/lib/auth";
+import { useAuth, FORWARD_DOCUMENTS_ROLE } from "@/lib/auth";
 import {
   ArrowRight,
   FileText,
@@ -51,6 +51,7 @@ export default function DocumentDetail() {
   const [, params] = useRoute("/documents/:id");
   const { user } = useAuth();
   const isSuperAdmin = user?.id === 1;
+  const canForward = isSuperAdmin || !!user?.roles?.includes(FORWARD_DOCUMENTS_ROLE);
   const documentId = Number(params?.id);
   const [note, setNote] = useState("");
   const [selectedDept, setSelectedDept] = useState<string>("");
@@ -288,8 +289,8 @@ export default function DocumentDetail() {
             </CardContent>
           </Card>
 
-          {/* New action card — forward form, super admin only (matches Laravel auth()->id() == 1 check) */}
-          {isSuperAdmin && (
+          {/* New action card — forward form, restricted to super admin or users with forwarding permission */}
+          {canForward && (
           <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">

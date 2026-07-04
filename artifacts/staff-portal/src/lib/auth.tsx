@@ -5,7 +5,10 @@ export interface AuthUser {
   username: string;
   full_name: string;
   email: string;
+  roles: string[];
 }
+
+export const FORWARD_DOCUMENTS_ROLE = "ئاڕاستەکردنی نووسراو";
 
 interface AuthContextType {
   user: AuthUser | null;
