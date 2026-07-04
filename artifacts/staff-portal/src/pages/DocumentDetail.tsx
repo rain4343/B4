@@ -1,6 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useRoute } from "wouter";
-import { ArrowRight, FileText, History, Plus, Download, ClipboardList, Send } from "lucide-react";
+import {
+  ArrowRight,
+  FileText,
+  History,
+  Plus,
+  Download,
+  ClipboardList,
+  Send,
+  Eye,
+  Loader2,
+  AlertTriangle,
+} from "lucide-react";
 import {
   useGetDocument,
   getGetDocumentQueryKey,
@@ -15,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -28,11 +40,15 @@ function statusColor(status: string): string {
   return "bg-muted text-muted-foreground border-border";
 }
 
+type PreviewStatus = "idle" | "checking" | "ok" | "error";
+
 export default function DocumentDetail() {
   const [, params] = useRoute("/documents/:id");
   const documentId = Number(params?.id);
   const [note, setNote] = useState("");
   const [selectedDept, setSelectedDept] = useState<string>("");
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewStatus, setPreviewStatus] = useState<PreviewStatus>("idle");
   const { toast } = useToast();
 
   const { data: document, isLoading: loadingDoc, refetch: refetchDoc } = useGetDocument(documentId, {
@@ -63,6 +79,34 @@ export default function DocumentDetail() {
   });
 
   const isPending = createLogMutation.isPending || updateDocMutation.isPending;
+
+  const documentFileUrl = document?.file_path
+    ? `/api/documents/uploads/${document.file_path}`
+    : null;
+
+  // Pre-flight check before rendering the PDF in an iframe, so we can fall
+  // back to the download button if the file is missing or not a PDF.
+  useEffect(() => {
+    if (!previewOpen || !documentFileUrl) return;
+    let cancelled = false;
+    setPreviewStatus("checking");
+    fetch(documentFileUrl, { credentials: "include" })
+      .then((res) => {
+        if (cancelled) return;
+        const contentType = res.headers.get("content-type") || "";
+        if (res.ok && contentType.includes("pdf")) {
+          setPreviewStatus("ok");
+        } else {
+          setPreviewStatus("error");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPreviewStatus("error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [previewOpen, documentFileUrl]);
 
   // Plain note — no department
   const addNote = () => {
@@ -113,9 +157,7 @@ export default function DocumentDetail() {
     );
   }
 
-  const fileUrl = document.file_path
-    ? `/api/documents/uploads/${document.file_path}`
-    : null;
+  const fileUrl = documentFileUrl;
 
   return (
     <div className="space-y-6" data-testid="page-document-detail" style={ku}>
@@ -177,15 +219,26 @@ export default function DocumentDetail() {
               {fileUrl && (
                 <>
                   <hr className="my-4" />
-                  <a
-                    href={fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 text-sm transition-colors"
-                  >
-                    <Download className="h-4 w-4" />
-                    بینین و داگرتنی هاوپێچ (PDF)
-                  </a>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewOpen(true)}
+                      className="flex items-center justify-center gap-2 flex-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 px-4 text-sm transition-colors"
+                      style={ku}
+                    >
+                      <Eye className="h-4 w-4" />
+                      بینین و داگرتنی هاوپێچ (PDF)
+                    </button>
+                    <a
+                      href={fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="داگرتنی هاوپێچ"
+                      className="flex items-center justify-center rounded-md border border-emerald-600 text-emerald-600 hover:bg-emerald-50 py-3 px-4 transition-colors"
+                    >
+                      <Download className="h-4 w-4" />
+                    </a>
+                  </div>
                 </>
               )}
             </CardContent>
@@ -301,6 +354,73 @@ export default function DocumentDetail() {
           </Card>
         </div>
       </div>
+
+      {/* PDF preview modal */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent
+          className="max-w-4xl w-[95vw] h-[85vh] flex flex-col p-0 gap-0"
+          style={ku}
+        >
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle className="flex items-center gap-2 text-base" style={ku}>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+              پیشاندانی هاوپێچ (PDF) — {document.document_number}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex-1 min-h-0 relative bg-muted/30">
+            {previewStatus === "checking" && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-muted-foreground" style={ku}>
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <p className="text-sm">هاوپێچ بارگیری دەکرێت...</p>
+              </div>
+            )}
+
+            {previewStatus === "error" && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-6 text-center" style={ku}>
+                <AlertTriangle className="h-8 w-8 text-amber-500" />
+                <p className="text-sm text-muted-foreground">
+                  نەتوانرا هاوپێچەکە لەناو لاپەڕەدا پیشان بدرێت. تکایە داگرتنی هاوپێچ تاقی بکەوە.
+                </p>
+                {fileUrl && (
+                  <a
+                    href={fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-5 text-sm transition-colors"
+                  >
+                    <Download className="h-4 w-4" />
+                    داگرتنی هاوپێچ
+                  </a>
+                )}
+              </div>
+            )}
+
+            {previewStatus === "ok" && fileUrl && (
+              <iframe
+                src={fileUrl}
+                title="پیشاندانی هاوپێچ (PDF)"
+                className="absolute inset-0 w-full h-full border-0"
+                onError={() => setPreviewStatus("error")}
+              />
+            )}
+          </div>
+
+          <div className="flex items-center justify-end gap-2 p-3 border-t bg-background">
+            {fileUrl && (
+              <a
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-md border py-2 px-4 text-sm hover:bg-muted transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                داگرتن
+              </a>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
