@@ -27,6 +27,7 @@ import type {
   DepartmentUpdate,
   Document,
   DocumentAttachmentInput,
+  DocumentForwardInput,
   DocumentInput,
   DocumentLog,
   DocumentLogInput,
@@ -2237,6 +2238,77 @@ export const useReplaceDocumentAttachment = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getReplaceDocumentAttachmentMutationOptions(options));
+    }
+
+export const getForwardDocumentUrl = (id: number,) => {
+
+
+
+
+  return `/api/documents/${id}/forward`
+}
+
+/**
+ * @summary Forward a document to a department (updates status + logs the action)
+ */
+export const forwardDocument = async (id: number,
+    documentForwardInput: DocumentForwardInput, options?: RequestInit): Promise<Document> => {
+
+  return customFetch<Document>(getForwardDocumentUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(documentForwardInput)
+  }
+);}
+
+
+
+
+export const getForwardDocumentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof forwardDocument>>, TError,{id: number;data: BodyType<DocumentForwardInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof forwardDocument>>, TError,{id: number;data: BodyType<DocumentForwardInput>}, TContext> => {
+
+const mutationKey = ['forwardDocument'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof forwardDocument>>, {id: number;data: BodyType<DocumentForwardInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  forwardDocument(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ForwardDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof forwardDocument>>>
+    export type ForwardDocumentMutationBody = BodyType<DocumentForwardInput>
+    export type ForwardDocumentMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Forward a document to a department (updates status + logs the action)
+ */
+export const useForwardDocument = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof forwardDocument>>, TError,{id: number;data: BodyType<DocumentForwardInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof forwardDocument>>,
+        TError,
+        {id: number;data: BodyType<DocumentForwardInput>},
+        TContext
+      > => {
+      return useMutation(getForwardDocumentMutationOptions(options));
     }
 
 export const getListDocumentLogsUrl = (id: number,) => {

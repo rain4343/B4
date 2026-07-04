@@ -21,6 +21,7 @@ import {
   getListDocumentLogsQueryKey,
   useCreateDocumentLog,
   useUpdateDocument,
+  useForwardDocument,
   useListDepartments,
   getListDepartmentsQueryKey,
   useReplaceDocumentAttachment,
@@ -70,6 +71,22 @@ export default function DocumentDetail() {
 
   const updateDocMutation = useUpdateDocument();
 
+  const forwardDocMutation = useForwardDocument({
+    mutation: {
+      onSuccess: (_data, variables) => {
+        const deptName =
+          departments?.find((d) => d.id === variables.data.department_id)?.name ?? "";
+        setNote("");
+        setSelectedDept("");
+        toast({ title: "نووسراوەکە بە سەرکەوتوویی ئاڕاستەکرا.", description: deptName });
+        refetchLogs();
+        refetchDoc();
+      },
+      onError: (err: any) =>
+        toast({ title: "هەڵە", description: err.message, variant: "destructive" }),
+    },
+  });
+
   const createLogMutation = useCreateDocumentLog({
     mutation: {
       onSuccess: () => {
@@ -97,7 +114,8 @@ export default function DocumentDetail() {
     },
   });
 
-  const isPending = createLogMutation.isPending || updateDocMutation.isPending;
+  const isPending =
+    createLogMutation.isPending || updateDocMutation.isPending || forwardDocMutation.isPending;
 
   const replaceAttachment = () => {
     if (!newAttachment || !documentId) return;
@@ -141,25 +159,13 @@ export default function DocumentDetail() {
     );
   };
 
-  // Route to department — updates status + logs the action
+  // Route to department — dedicated forward endpoint (updates status + logs the action)
   const routeToDepartment = () => {
     if (!selectedDept) return;
-    const deptName = departments?.find((d) => String(d.id) === selectedDept)?.name ?? selectedDept;
-    const newStatus = `ئاڕاستەکرا بۆ: ${deptName}`;
-    const action = `نووسراوەکە ئاڕاستەکرا بۆ: ${deptName}`;
-    updateDocMutation.mutate(
-      { id: documentId, data: { current_status: newStatus } },
-      {
-        onSuccess: () => {
-          createLogMutation.mutate(
-            { id: documentId, data: { action, notes: note || undefined } },
-            { onSuccess: () => toast({ title: "نووسراوەکە بە سەرکەوتوویی ئاڕاستەکرا.", description: deptName }) }
-          );
-        },
-        onError: (err: any) =>
-          toast({ title: "هەڵە", description: err.message, variant: "destructive" }),
-      }
-    );
+    forwardDocMutation.mutate({
+      id: documentId,
+      data: { department_id: Number(selectedDept), notes: note || undefined },
+    });
   };
 
   if (loadingDoc) {

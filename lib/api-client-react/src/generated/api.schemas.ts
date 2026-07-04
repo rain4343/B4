@@ -179,6 +179,12 @@ export interface DocumentAttachmentInput {
   attachment: Blob;
 }
 
+export interface DocumentForwardInput {
+  department_id: number;
+  /** @maxLength 1000 */
+  notes?: string;
+}
+
 export interface DocumentLog {
   id: number;
   document_id: number;

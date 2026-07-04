@@ -567,6 +567,36 @@ export const ReplaceDocumentAttachmentResponse = zod.object({
 
 
 /**
+ * @summary Forward a document to a department (updates status + logs the action)
+ */
+export const ForwardDocumentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const forwardDocumentBodyNotesMax = 1000;
+
+
+
+export const ForwardDocumentBody = zod.object({
+  "department_id": zod.number(),
+  "notes": zod.string().max(forwardDocumentBodyNotesMax).optional()
+})
+
+export const ForwardDocumentResponse = zod.object({
+  "id": zod.number(),
+  "document_number": zod.string(),
+  "document_date": zod.coerce.date(),
+  "subject": zod.string(),
+  "creator_id": zod.number(),
+  "creator_name": zod.string().nullish(),
+  "current_status": zod.string(),
+  "file_path": zod.string(),
+  "created_at": zod.coerce.date(),
+  "updated_at": zod.coerce.date()
+})
+
+
+/**
  * @summary List activity logs for a document
  */
 export const ListDocumentLogsParams = zod.object({

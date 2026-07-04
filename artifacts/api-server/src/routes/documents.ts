@@ -3,7 +3,7 @@ import { eq, ilike, and, desc, type SQL } from "drizzle-orm";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { db, documentsTable, documentLogsTable, usersTable } from "@workspace/db";
+import { db, documentsTable, documentLogsTable, usersTable, departmentsTable } from "@workspace/db";
 import {
   UpdateDocumentBody,
   GetDocumentParams,
@@ -14,6 +14,8 @@ import {
   CreateDocumentLogBody,
   ListDocumentsQueryParams,
   ReplaceDocumentAttachmentParams,
+  ForwardDocumentParams,
+  ForwardDocumentBody,
 } from "@workspace/api-zod";
 const router = Router();
 
@@ -220,6 +222,46 @@ router.post("/documents/:id/attachment", upload.single("attachment"), async (req
     const oldAbsolutePath = path.join(process.cwd(), "uploads", oldFilePath);
     fs.unlink(oldAbsolutePath, () => {});
   }
+
+  const result = await getDocumentWithCreator(paramParsed.data.id);
+  return res.json(result);
+});
+
+// POST /documents/:id/forward
+router.post("/documents/:id/forward", async (req, res) => {
+  const paramParsed = ForwardDocumentParams.safeParse(req.params);
+  if (!paramParsed.success) return res.status(400).json({ error: "Invalid document ID" });
+
+  const parsed = ForwardDocumentBody.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
+
+  const [existing] = await db
+    .select({ id: documentsTable.id })
+    .from(documentsTable)
+    .where(eq(documentsTable.id, paramParsed.data.id))
+    .limit(1);
+  if (!existing) return res.status(404).json({ error: "Document not found" });
+
+  const [department] = await db
+    .select({ id: departmentsTable.id, name: departmentsTable.name })
+    .from(departmentsTable)
+    .where(eq(departmentsTable.id, parsed.data.department_id))
+    .limit(1);
+  if (!department) return res.status(400).json({ error: "Department not found" });
+
+  const newStatus = `ئاڕاستەکرا بۆ: ${department.name}`;
+
+  await db
+    .update(documentsTable)
+    .set({ current_status: newStatus, updated_at: new Date() })
+    .where(eq(documentsTable.id, paramParsed.data.id));
+
+  await db.insert(documentLogsTable).values({
+    document_id: paramParsed.data.id,
+    user_id: req.session?.userId ?? null,
+    action: `نووسراوەکە ئاڕاستەکرا بۆ: ${department.name}`,
+    notes: parsed.data.notes || null,
+  });
 
   const result = await getDocumentWithCreator(paramParsed.data.id);
   return res.json(result);
