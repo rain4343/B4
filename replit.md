@@ -25,10 +25,10 @@ A full-stack staff management application built as a pnpm TypeScript monorepo.
 
 Both services start automatically via Replit workflows:
 
-| Service      | Workflow     | Port  |
-|--------------|--------------|-------|
-| Staff Portal | Staff Portal | 24027 |
-| API Server   | API Server   | 8080  |
+| Service      | Workflow                              | Port  |
+|--------------|---------------------------------------|-------|
+| Staff Portal | `artifacts/staff-portal: web`         | 24027 |
+| API Server   | `artifacts/api-server: API Server`    | 8080  |
 
 ## Database
 
