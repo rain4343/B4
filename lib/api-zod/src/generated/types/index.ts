@@ -12,6 +12,7 @@ export * from './departmentCount';
 export * from './departmentInput';
 export * from './departmentUpdate';
 export * from './document';
+export * from './documentAttachmentInput';
 export * from './documentInput';
 export * from './documentLog';
 export * from './documentLogInput';

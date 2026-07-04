@@ -26,6 +26,7 @@ import type {
   DepartmentInput,
   DepartmentUpdate,
   Document,
+  DocumentAttachmentInput,
   DocumentInput,
   DocumentLog,
   DocumentLogInput,
@@ -2163,6 +2164,79 @@ export const useDeleteDocument = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getDeleteDocumentMutationOptions(options));
+    }
+
+export const getReplaceDocumentAttachmentUrl = (id: number,) => {
+
+
+
+
+  return `/api/documents/${id}/attachment`
+}
+
+/**
+ * @summary Replace a document's PDF attachment (multipart/form-data)
+ */
+export const replaceDocumentAttachment = async (id: number,
+    documentAttachmentInput: DocumentAttachmentInput, options?: RequestInit): Promise<Document> => {
+    const formData = new FormData();
+formData.append(`attachment`, documentAttachmentInput.attachment);
+
+  return customFetch<Document>(getReplaceDocumentAttachmentUrl(id),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+export const getReplaceDocumentAttachmentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof replaceDocumentAttachment>>, TError,{id: number;data: BodyType<DocumentAttachmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof replaceDocumentAttachment>>, TError,{id: number;data: BodyType<DocumentAttachmentInput>}, TContext> => {
+
+const mutationKey = ['replaceDocumentAttachment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof replaceDocumentAttachment>>, {id: number;data: BodyType<DocumentAttachmentInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  replaceDocumentAttachment(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReplaceDocumentAttachmentMutationResult = NonNullable<Awaited<ReturnType<typeof replaceDocumentAttachment>>>
+    export type ReplaceDocumentAttachmentMutationBody = BodyType<DocumentAttachmentInput>
+    export type ReplaceDocumentAttachmentMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Replace a document's PDF attachment (multipart/form-data)
+ */
+export const useReplaceDocumentAttachment = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof replaceDocumentAttachment>>, TError,{id: number;data: BodyType<DocumentAttachmentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof replaceDocumentAttachment>>,
+        TError,
+        {id: number;data: BodyType<DocumentAttachmentInput>},
+        TContext
+      > => {
+      return useMutation(getReplaceDocumentAttachmentMutationOptions(options));
     }
 
 export const getListDocumentLogsUrl = (id: number,) => {

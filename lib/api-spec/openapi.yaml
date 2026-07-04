@@ -674,6 +674,49 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /documents/{id}/attachment:
+    post:
+      operationId: replaceDocumentAttachment
+      tags: [documents]
+      summary: Replace a document's PDF attachment (multipart/form-data)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/DocumentAttachmentInput"
+      responses:
+        "200":
+          description: Attachment replaced
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Document"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Document not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /documents/{id}/logs:
     get:
       operationId: listDocumentLogs
@@ -996,6 +1039,14 @@ components:
         current_status:
           type: string
           maxLength: 50
+
+    DocumentAttachmentInput:
+      type: object
+      required: [attachment]
+      properties:
+        attachment:
+          type: string
+          format: binary
 
     DocumentLog:
       type: object

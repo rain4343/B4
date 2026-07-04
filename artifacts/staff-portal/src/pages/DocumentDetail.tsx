@@ -11,6 +11,8 @@ import {
   Eye,
   Loader2,
   AlertTriangle,
+  RefreshCw,
+  Upload,
 } from "lucide-react";
 import {
   useGetDocument,
@@ -21,6 +23,7 @@ import {
   useUpdateDocument,
   useListDepartments,
   getListDepartmentsQueryKey,
+  useReplaceDocumentAttachment,
 } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,6 +52,8 @@ export default function DocumentDetail() {
   const [selectedDept, setSelectedDept] = useState<string>("");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewStatus, setPreviewStatus] = useState<PreviewStatus>("idle");
+  const [replaceOpen, setReplaceOpen] = useState(false);
+  const [newAttachment, setNewAttachment] = useState<File | null>(null);
   const { toast } = useToast();
 
   const { data: document, isLoading: loadingDoc, refetch: refetchDoc } = useGetDocument(documentId, {
@@ -78,7 +83,26 @@ export default function DocumentDetail() {
     },
   });
 
+  const replaceAttachmentMutation = useReplaceDocumentAttachment({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: "هاوپێچی نووسراو بە سەرکەوتوویی نوێکرایەوە." });
+        setReplaceOpen(false);
+        setNewAttachment(null);
+        refetchDoc();
+        refetchLogs();
+      },
+      onError: (err: any) =>
+        toast({ title: "هەڵە", description: err.message, variant: "destructive" }),
+    },
+  });
+
   const isPending = createLogMutation.isPending || updateDocMutation.isPending;
+
+  const replaceAttachment = () => {
+    if (!newAttachment || !documentId) return;
+    replaceAttachmentMutation.mutate({ id: documentId, data: { attachment: newAttachment } });
+  };
 
   const documentFileUrl = document?.file_path
     ? `/api/documents/uploads/${document.file_path}`
@@ -238,6 +262,17 @@ export default function DocumentDetail() {
                     >
                       <Download className="h-4 w-4" />
                     </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNewAttachment(null);
+                        setReplaceOpen(true);
+                      }}
+                      title="نوێکردنەوەی هاوپێچ"
+                      className="flex items-center justify-center rounded-md border border-muted-foreground/30 text-muted-foreground hover:bg-muted py-3 px-4 transition-colors"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </button>
                   </div>
                 </>
               )}
@@ -418,6 +453,69 @@ export default function DocumentDetail() {
                 داگرتن
               </a>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Replace attachment modal */}
+      <Dialog
+        open={replaceOpen}
+        onOpenChange={(open) => {
+          setReplaceOpen(open);
+          if (!open) setNewAttachment(null);
+        }}
+      >
+        <DialogContent className="max-w-md" style={ku}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base" style={ku}>
+              <RefreshCw className="h-4 w-4 text-muted-foreground" />
+              نوێکردنەوەی هاوپێچ
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              هاوپێچی PDF ی نوێ هەڵبژێرە بۆ ئەوەی جێگای هاوپێچی ئێستای نووسراوەکە بگرێتەوە. ئەم کردارە تۆمار دەکرێت لە مێژووی جووڵەی نووسراودا.
+            </p>
+
+            <label
+              htmlFor="replace-attachment-input"
+              className="flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed border-muted-foreground/30 py-8 px-4 text-center cursor-pointer hover:bg-muted/50 transition-colors"
+            >
+              <Upload className="h-6 w-6 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                {newAttachment ? newAttachment.name : "کلیک بکە بۆ هەڵبژاردنی فایلی PDF"}
+              </span>
+              <input
+                id="replace-attachment-input"
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={(e) => setNewAttachment(e.target.files?.[0] ?? null)}
+              />
+            </label>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setReplaceOpen(false)}
+                disabled={replaceAttachmentMutation.isPending}
+              >
+                هەڵوەشاندنەوە
+              </Button>
+              <Button
+                onClick={replaceAttachment}
+                disabled={!newAttachment || replaceAttachmentMutation.isPending}
+                className="flex items-center gap-2"
+              >
+                {replaceAttachmentMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                نوێکردنەوە
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

@@ -13,6 +13,7 @@ import {
   CreateDocumentLogParams,
   CreateDocumentLogBody,
   ListDocumentsQueryParams,
+  ReplaceDocumentAttachmentParams,
 } from "@workspace/api-zod";
 const router = Router();
 
@@ -175,6 +176,53 @@ router.get("/documents/:id", async (req, res) => {
   const doc = await getDocumentWithCreator(parsed.data.id);
   if (!doc) return res.status(404).json({ error: "Document not found" });
   return res.json(doc);
+});
+
+// POST /documents/:id/attachment — replace the PDF attachment
+router.post("/documents/:id/attachment", upload.single("attachment"), async (req, res) => {
+  const userId = req.session?.userId;
+  if (!userId) return res.status(401).json({ error: "Authentication required" });
+
+  const paramParsed = ReplaceDocumentAttachmentParams.safeParse(req.params);
+  if (!paramParsed.success) return res.status(400).json({ error: "Invalid document ID" });
+
+  if (!req.file) return res.status(400).json({ error: "PDF attachment is required" });
+
+  const [existing] = await db
+    .select({ id: documentsTable.id, file_path: documentsTable.file_path })
+    .from(documentsTable)
+    .where(eq(documentsTable.id, paramParsed.data.id))
+    .limit(1);
+
+  if (!existing) {
+    // Clean up the uploaded file since the document doesn't exist.
+    fs.unlink(req.file.path, () => {});
+    return res.status(404).json({ error: "Document not found" });
+  }
+
+  const newFilePath = `attachments/${req.file.filename}`;
+  const oldFilePath = existing.file_path;
+
+  await db
+    .update(documentsTable)
+    .set({ file_path: newFilePath, updated_at: new Date() })
+    .where(eq(documentsTable.id, paramParsed.data.id));
+
+  await db.insert(documentLogsTable).values({
+    document_id: paramParsed.data.id,
+    user_id: userId,
+    action: "هاوپێچی نووسراو نوێکرایەوە",
+    notes: null,
+  });
+
+  // Remove the old file from disk now that the DB record points to the new one.
+  if (oldFilePath) {
+    const oldAbsolutePath = path.join(process.cwd(), "uploads", oldFilePath);
+    fs.unlink(oldAbsolutePath, () => {});
+  }
+
+  const result = await getDocumentWithCreator(paramParsed.data.id);
+  return res.json(result);
 });
 
 // PATCH /documents/:id

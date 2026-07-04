@@ -175,6 +175,10 @@ export interface DocumentUpdate {
   current_status?: string;
 }
 
+export interface DocumentAttachmentInput {
+  attachment: Blob;
+}
+
 export interface DocumentLog {
   id: number;
   document_id: number;

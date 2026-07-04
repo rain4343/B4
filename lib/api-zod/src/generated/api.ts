@@ -542,6 +542,31 @@ export const DeleteDocumentResponse = zod.void()
 
 
 /**
+ * @summary Replace a document's PDF attachment (multipart/form-data)
+ */
+export const ReplaceDocumentAttachmentParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ReplaceDocumentAttachmentBody = zod.object({
+  "attachment": zod.instanceof(File)
+})
+
+export const ReplaceDocumentAttachmentResponse = zod.object({
+  "id": zod.number(),
+  "document_number": zod.string(),
+  "document_date": zod.coerce.date(),
+  "subject": zod.string(),
+  "creator_id": zod.number(),
+  "creator_name": zod.string().nullish(),
+  "current_status": zod.string(),
+  "file_path": zod.string(),
+  "created_at": zod.coerce.date(),
+  "updated_at": zod.coerce.date()
+})
+
+
+/**
  * @summary List activity logs for a document
  */
 export const ListDocumentLogsParams = zod.object({
