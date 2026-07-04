@@ -229,6 +229,10 @@ router.post("/documents/:id/attachment", upload.single("attachment"), async (req
 
 // POST /documents/:id/forward
 router.post("/documents/:id/forward", async (req, res) => {
+  if (req.session?.userId !== 1) {
+    return res.status(403).json({ error: "تەنها بەڕێوەبەری سەرەکی دەتوانێت نووسراو ئاڕاستە بکات" });
+  }
+
   const paramParsed = ForwardDocumentParams.safeParse(req.params);
   if (!paramParsed.success) return res.status(400).json({ error: "Invalid document ID" });
 

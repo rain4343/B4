@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useRoute } from "wouter";
+import { useAuth } from "@/lib/auth";
 import {
   ArrowRight,
   FileText,
@@ -48,6 +49,8 @@ type PreviewStatus = "idle" | "checking" | "ok" | "error";
 
 export default function DocumentDetail() {
   const [, params] = useRoute("/documents/:id");
+  const { user } = useAuth();
+  const isSuperAdmin = user?.id === 1;
   const documentId = Number(params?.id);
   const [note, setNote] = useState("");
   const [selectedDept, setSelectedDept] = useState<string>("");
@@ -285,12 +288,13 @@ export default function DocumentDetail() {
             </CardContent>
           </Card>
 
-          {/* New action card */}
+          {/* New action card — forward form, super admin only (matches Laravel auth()->id() == 1 check) */}
+          {isSuperAdmin && (
           <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <ClipboardList className="h-5 w-5 text-muted-foreground" />
-                کرداری نوێ
+                کرداری نوێ: هامش و ئاڕاستەکردن
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -352,6 +356,7 @@ export default function DocumentDetail() {
               </div>
             </CardContent>
           </Card>
+          )}
         </div>
 
         {/* ── Right column (1/3): movement history ── */}
