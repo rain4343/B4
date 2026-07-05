@@ -34,13 +34,8 @@ export default function Login() {
       <div className="w-full max-w-md mx-4">
         {/* Logo / Brand */}
         <div className="text-center mb-8">
-          <div
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-            style={{ background: '#0d6efd' }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-5-4M9 20H4v-2a4 4 0 015-4m4-4a4 4 0 100-8 4 4 0 000 8z" />
-            </svg>
+          <div className="flex justify-center mb-4">
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="لۆگۆ" className="w-28 h-28 object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight">ئی-ڕێکار</h1>
           <p className="text-slate-400 mt-1 text-sm">سیستەمی ب.پ.شارباژێڕ</p>
