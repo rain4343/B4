@@ -15,6 +15,7 @@ import Roles from '@/pages/Roles';
 import Documents from '@/pages/Documents';
 import DocumentForm from '@/pages/DocumentForm';
 import DocumentDetail from '@/pages/DocumentDetail';
+import Profile from '@/pages/Profile';
 import Login from '@/pages/Login';
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ function ProtectedRouter() {
         <Route path="/documents/new" component={DocumentForm} />
         <Route path="/documents/:id/edit" component={DocumentForm} />
         <Route path="/documents/:id" component={DocumentDetail} />
+        <Route path="/profile" component={Profile} />
         <Route component={NotFound} />
       </Switch>
     </Shell>

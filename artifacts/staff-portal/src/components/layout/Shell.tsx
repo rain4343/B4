@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, Building2, Shield, Menu, LogOut, FileText } from "lucide-react";
+import { LayoutDashboard, Users, Building2, Shield, Menu, LogOut, FileText, UserCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
@@ -11,6 +11,7 @@ const navItems = [
   { icon: Building2, label: "بەڕێوەبردنی هۆبەکان", href: "/departments" },
   { icon: Shield, label: "بەڕێوەبردنی ڕۆڵەکان", href: "/roles" },
   { icon: FileText, label: "بەڕێوەبردنی نوسراوەکان", href: "/documents" },
+  { icon: UserCircle, label: "پڕۆفایلی من", href: "/profile" },
 ];
 
 export function Shell({ children }: { children: React.ReactNode }) {

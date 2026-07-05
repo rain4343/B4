@@ -11,6 +11,7 @@ export const usersTable = pgTable("users", {
   password: varchar("password", { length: 255 }).notNull(),
   department_id: integer("department_id").references(() => departmentsTable.id, { onDelete: "set null" }),
   remember_token: varchar("remember_token", { length: 100 }),
+  signature_image: varchar("signature_image", { length: 500 }),
   created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

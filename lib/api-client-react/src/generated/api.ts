@@ -41,6 +41,7 @@ import type {
   RoleAssignment,
   RoleCount,
   RoleInput,
+  SignatureImageInput,
   UserInput,
   UserUpdate,
   UserWithRoles
@@ -1183,6 +1184,79 @@ export const useRemoveRole = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getRemoveRoleMutationOptions(options));
+    }
+
+export const getUploadSignatureUrl = (id: number,) => {
+
+
+
+
+  return `/api/users/${id}/signature`
+}
+
+/**
+ * @summary Upload a signature image for a user (PNG only, max 1 MB)
+ */
+export const uploadSignature = async (id: number,
+    signatureImageInput: SignatureImageInput, options?: RequestInit): Promise<UserWithRoles> => {
+    const formData = new FormData();
+formData.append(`signature`, signatureImageInput.signature);
+
+  return customFetch<UserWithRoles>(getUploadSignatureUrl(id),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+export const getUploadSignatureMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadSignature>>, TError,{id: number;data: BodyType<SignatureImageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadSignature>>, TError,{id: number;data: BodyType<SignatureImageInput>}, TContext> => {
+
+const mutationKey = ['uploadSignature'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadSignature>>, {id: number;data: BodyType<SignatureImageInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  uploadSignature(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadSignatureMutationResult = NonNullable<Awaited<ReturnType<typeof uploadSignature>>>
+    export type UploadSignatureMutationBody = BodyType<SignatureImageInput>
+    export type UploadSignatureMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Upload a signature image for a user (PNG only, max 1 MB)
+ */
+export const useUploadSignature = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadSignature>>, TError,{id: number;data: BodyType<SignatureImageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof uploadSignature>>,
+        TError,
+        {id: number;data: BodyType<SignatureImageInput>},
+        TContext
+      > => {
+      return useMutation(getUploadSignatureMutationOptions(options));
     }
 
 export const getListRolesUrl = () => {

@@ -1,6 +1,9 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import { eq, ilike, and, inArray } from "drizzle-orm";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 import { db, usersTable, rolesTable, roleUserTable, departmentsTable } from "@workspace/db";
 import {
   CreateUserBody,
@@ -17,6 +20,31 @@ import {
 
 const router = Router();
 
+// ── Signature upload setup ─────────────────────────────────────
+const sigUploadDir = path.join(process.cwd(), "uploads", "signatures");
+fs.mkdirSync(sigUploadDir, { recursive: true });
+
+const sigStorage = multer.diskStorage({
+  destination: sigUploadDir,
+  filename: (_req, _file, cb) => {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${unique}.png`);
+  },
+});
+
+const sigUpload = multer({
+  storage: sigStorage,
+  limits: { fileSize: 1 * 1024 * 1024 }, // 1 MB
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype === "image/png") {
+      cb(null, true);
+    } else {
+      cb(new Error("PNG files only"));
+    }
+  },
+});
+
+// ── Helpers ───────────────────────────────────────────────────
 async function getUserWithRoles(id: number) {
   const [user] = await db
     .select({
@@ -26,6 +54,7 @@ async function getUserWithRoles(id: number) {
       email: usersTable.email,
       department_id: usersTable.department_id,
       department_name: departmentsTable.name,
+      signature_image: usersTable.signature_image,
       created_at: usersTable.created_at,
       updated_at: usersTable.updated_at,
     })
@@ -45,6 +74,14 @@ async function getUserWithRoles(id: number) {
   return { ...user, roles };
 }
 
+// GET /users/uploads/signatures/:filename  — serve signature images
+router.get("/users/uploads/signatures/:filename", (req, res) => {
+  const filename = path.basename(req.params.filename); // prevent path traversal
+  const filePath = path.join(sigUploadDir, filename);
+  if (!fs.existsSync(filePath)) return res.status(404).json({ error: "Not found" });
+  res.sendFile(filePath);
+});
+
 // GET /users
 router.get("/users", async (req, res) => {
   const parsed = ListUsersQueryParams.safeParse(req.query);
@@ -62,6 +99,7 @@ router.get("/users", async (req, res) => {
       email: usersTable.email,
       department_id: usersTable.department_id,
       department_name: departmentsTable.name,
+      signature_image: usersTable.signature_image,
       created_at: usersTable.created_at,
       updated_at: usersTable.updated_at,
     })
@@ -247,6 +285,34 @@ router.delete("/users/:id/roles/:roleId", async (req, res) => {
 
   const result = await getUserWithRoles(id);
   if (!result) return res.status(404).json({ error: "User not found" });
+  return res.json(result);
+});
+
+// POST /users/:id/signature  — upload PNG signature image
+router.post("/users/:id/signature", sigUpload.single("signature"), async (req, res) => {
+  const parsed = GetUserParams.safeParse(req.params);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid user ID" });
+  const { id } = parsed.data;
+
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+  const [exists] = await db
+    .select({ id: usersTable.id, signature_image: usersTable.signature_image })
+    .from(usersTable)
+    .where(eq(usersTable.id, id))
+    .limit(1);
+  if (!exists) return res.status(404).json({ error: "User not found" });
+
+  // Delete old signature file if present
+  if (exists.signature_image) {
+    const oldPath = path.join(sigUploadDir, path.basename(exists.signature_image));
+    if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+  }
+
+  const relPath = req.file.filename;
+  await db.update(usersTable).set({ signature_image: relPath, updated_at: new Date() }).where(eq(usersTable.id, id));
+
+  const result = await getUserWithRoles(id);
   return res.json(result);
 });
 

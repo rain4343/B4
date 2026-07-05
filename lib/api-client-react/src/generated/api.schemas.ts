@@ -62,6 +62,8 @@ export interface UserWithRoles {
   department_id?: number | null;
   /** @nullable */
   department_name?: string | null;
+  /** @nullable */
+  signature_image?: string | null;
   created_at: string;
   updated_at: string;
   roles: Role[];
@@ -173,6 +175,10 @@ export interface DocumentUpdate {
   subject?: string;
   /** @maxLength 50 */
   current_status?: string;
+}
+
+export interface SignatureImageInput {
+  signature: Blob;
 }
 
 export interface DocumentAttachmentInput {

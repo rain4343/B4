@@ -110,6 +110,7 @@ export const GetDepartmentStaffResponseItem = zod.object({
   "email": zod.string(),
   "department_id": zod.number().nullish(),
   "department_name": zod.string().nullish(),
+  "signature_image": zod.string().nullish(),
   "created_at": zod.coerce.date(),
   "updated_at": zod.coerce.date(),
   "roles": zod.array(zod.object({
@@ -136,6 +137,7 @@ export const ListUsersResponseItem = zod.object({
   "email": zod.string(),
   "department_id": zod.number().nullish(),
   "department_name": zod.string().nullish(),
+  "signature_image": zod.string().nullish(),
   "created_at": zod.coerce.date(),
   "updated_at": zod.coerce.date(),
   "roles": zod.array(zod.object({
@@ -173,6 +175,7 @@ export const CreateUserResponse = zod.object({
   "email": zod.string(),
   "department_id": zod.number().nullish(),
   "department_name": zod.string().nullish(),
+  "signature_image": zod.string().nullish(),
   "created_at": zod.coerce.date(),
   "updated_at": zod.coerce.date(),
   "roles": zod.array(zod.object({
@@ -196,6 +199,7 @@ export const GetUserResponse = zod.object({
   "email": zod.string(),
   "department_id": zod.number().nullish(),
   "department_name": zod.string().nullish(),
+  "signature_image": zod.string().nullish(),
   "created_at": zod.coerce.date(),
   "updated_at": zod.coerce.date(),
   "roles": zod.array(zod.object({
@@ -236,6 +240,7 @@ export const UpdateUserResponse = zod.object({
   "email": zod.string(),
   "department_id": zod.number().nullish(),
   "department_name": zod.string().nullish(),
+  "signature_image": zod.string().nullish(),
   "created_at": zod.coerce.date(),
   "updated_at": zod.coerce.date(),
   "roles": zod.array(zod.object({
@@ -287,6 +292,7 @@ export const AssignRoleResponse = zod.object({
   "email": zod.string(),
   "department_id": zod.number().nullish(),
   "department_name": zod.string().nullish(),
+  "signature_image": zod.string().nullish(),
   "created_at": zod.coerce.date(),
   "updated_at": zod.coerce.date(),
   "roles": zod.array(zod.object({
@@ -311,6 +317,35 @@ export const RemoveRoleResponse = zod.object({
   "email": zod.string(),
   "department_id": zod.number().nullish(),
   "department_name": zod.string().nullish(),
+  "signature_image": zod.string().nullish(),
+  "created_at": zod.coerce.date(),
+  "updated_at": zod.coerce.date(),
+  "roles": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string()
+}))
+})
+
+
+/**
+ * @summary Upload a signature image for a user (PNG only, max 1 MB)
+ */
+export const UploadSignatureParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UploadSignatureBody = zod.object({
+  "signature": zod.instanceof(File)
+})
+
+export const UploadSignatureResponse = zod.object({
+  "id": zod.number(),
+  "full_name": zod.string(),
+  "username": zod.string(),
+  "email": zod.string(),
+  "department_id": zod.number().nullish(),
+  "department_name": zod.string().nullish(),
+  "signature_image": zod.string().nullish(),
   "created_at": zod.coerce.date(),
   "updated_at": zod.coerce.date(),
   "roles": zod.array(zod.object({
@@ -371,6 +406,7 @@ export const GetRoleUsersResponseItem = zod.object({
   "email": zod.string(),
   "department_id": zod.number().nullish(),
   "department_name": zod.string().nullish(),
+  "signature_image": zod.string().nullish(),
   "created_at": zod.coerce.date(),
   "updated_at": zod.coerce.date(),
   "roles": zod.array(zod.object({
@@ -424,6 +460,7 @@ export const GetRecentStaffResponseItem = zod.object({
   "email": zod.string(),
   "department_id": zod.number().nullish(),
   "department_name": zod.string().nullish(),
+  "signature_image": zod.string().nullish(),
   "created_at": zod.coerce.date(),
   "updated_at": zod.coerce.date(),
   "roles": zod.array(zod.object({

@@ -16,6 +16,8 @@ export interface UserWithRoles {
   department_id?: number | null;
   /** @nullable */
   department_name?: string | null;
+  /** @nullable */
+  signature_image?: string | null;
   created_at: Date;
   updated_at: Date;
   roles: Role[];

@@ -27,6 +27,7 @@ export * from './role';
 export * from './roleAssignment';
 export * from './roleCount';
 export * from './roleInput';
+export * from './signatureImageInput';
 export * from './userInput';
 export * from './userUpdate';
 export * from './userWithRoles';

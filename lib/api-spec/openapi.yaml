@@ -401,6 +401,43 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /users/{id}/signature:
+    post:
+      operationId: uploadSignature
+      tags: [users]
+      summary: Upload a signature image for a user (PNG only, max 1 MB)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/SignatureImageInput"
+      responses:
+        "200":
+          description: Signature uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserWithRoles"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   # ── Roles ─────────────────────────────────────────────────────
   /roles:
     get:
@@ -934,6 +971,8 @@ components:
           type: ["integer", "null"]
         department_name:
           type: ["string", "null"]
+        signature_image:
+          type: ["string", "null"]
         created_at:
           type: string
           format: date-time
@@ -1103,6 +1142,14 @@ components:
         current_status:
           type: string
           maxLength: 50
+
+    SignatureImageInput:
+      type: object
+      required: [signature]
+      properties:
+        signature:
+          type: string
+          format: binary
 
     DocumentAttachmentInput:
       type: object
