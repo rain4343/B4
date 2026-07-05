@@ -48,7 +48,7 @@ export default function Login() {
 
         {/* Form card */}
         <div className="rounded-2xl p-8 shadow-2xl" style={{ background: '#1e293b', border: '1px solid #334155' }}>
-          <h2 className="text-lg font-semibold text-white mb-6 text-center">چوونەژوورەوە بە هەژمارەکەت</h2>
+          <h2 className="text-lg font-semibold text-white mb-6 text-center">چوونەژوورەوە</h2>
 
           {error && (
             <div className="mb-4 rounded-lg px-4 py-3 text-sm text-red-200" style={{ background: '#450a0a', border: '1px solid #7f1d1d' }}>
