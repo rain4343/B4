@@ -36,7 +36,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </div>
           <div>
             <h2 className="text-base font-bold text-white" style={ku}>ئی-ڕێکار</h2>
-            <p className="text-[10px] text-slate-400 mt-0" style={ku}>سیستەمی بەڕێوەبردن</p>
+            <p className="text-[10px] text-slate-400 mt-0" style={ku}>ب.پ.شارباژێڕ</p>
           </div>
         </div>
       </div>
