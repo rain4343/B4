@@ -35,7 +35,7 @@ export default function Login() {
         {/* Logo / Brand */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="لۆگۆ" className="w-28 h-28 object-contain" />
+            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="لۆگۆ" className="w-40 h-40 object-contain" />
           </div>
           <h1 className="text-3xl font-bold text-white tracking-tight">ئی-ڕێکار</h1>
           <p className="text-slate-400 mt-1 text-sm">سیستەمی ب.پ.شارباژێڕ</p>
