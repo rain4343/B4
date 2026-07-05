@@ -144,7 +144,8 @@ export default function Documents() {
                         <Button
                           variant="ghost" size="icon"
                           onClick={() => setDeleteId(doc.id)}
-                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          aria-label="سڕینەوەی نوسراو"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

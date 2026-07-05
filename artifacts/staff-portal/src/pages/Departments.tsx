@@ -120,16 +120,16 @@ export default function Departments() {
                 </span>
 
                 {/* Actions */}
-                <div className="absolute top-4 left-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
+                <div className="absolute top-4 left-4 flex gap-1">
+                  <Button variant="ghost" size="icon" className="h-7 w-7" asChild aria-label="بینینی فەرمانبەران">
                     <Link href={`/departments/${dept.id}`}>
                       <Eye className="h-3.5 w-3.5 text-muted-foreground" />
                     </Link>
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(dept)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(dept)} aria-label="دەستکاریکردن">
                     <Pencil className="h-3.5 w-3.5 text-blue-600" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setDeleteId(dept.id)}>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setDeleteId(dept.id)} aria-label="سڕینەوە">
                     <Trash2 className="h-3.5 w-3.5 text-destructive" />
                   </Button>
                 </div>
